@@ -1,42 +1,58 @@
 name: Android APK
 
 on:
-  workflow_dispatch:
   push:
     branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-22.04
-    timeout-minutes: 90
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Sistem paketleri
+    steps:
+      - name: Depoyu Cek
+        uses: actions/checkout@v4
+
+      - name: Java 17 Kur (Android API 34 ve Gradle Icin Zorunlu)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Python 3.11 Kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Sistem Bagimliliklarini Kur
         run: |
           sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip python3-venv \
-            autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev \
-            libtinfo5 cmake libffi-dev libssl-dev build-essential
+          sudo apt-get install -y \
+            build-essential git zip unzip \
+            autoconf libtool pkg-config zlib1g-dev \
+            libncurses5-dev libncursesw5-dev libtinfo5 \
+            cmake libffi-dev libssl-dev automake \
+            libltdl-dev patch
 
-      - name: Buildozer kur
+      - name: Buildozer ve Cython Kur
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install --upgrade buildozer cython==0.29.36
+          python3 -m pip install --upgrade pip "setuptools<70.0.0" wheel
+          python3 -m pip install "cython==0.29.36" buildozer
 
-      - name: Önbellek (Android SDK/NDK tekrar indirilmesin)
+      - name: Buildozer Onbellegini Yukle
         uses: actions/cache@v4
         with:
           path: |
-            ~/.buildozer
             .buildozer
-          key: buildozer-${{ hashFiles('buildozer.spec') }}
+            ~/.buildozer
+          key: lugat-v2-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
 
-      - name: APK derle
-        run: buildozer -v android debug
+      - name: APK Derle
+        run: |
+          yes | buildozer android debug
 
-      - name: APK'yı yükle
+      - name: APK Dosyasini Yukle
         uses: actions/upload-artifact@v4
         with:
-          name: lugat-apk
+          name: lugat-debug-apk
           path: bin/*.apk
