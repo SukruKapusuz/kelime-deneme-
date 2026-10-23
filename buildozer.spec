@@ -1,13 +1,34 @@
-# Python ve hostpython sürümünü Kivy 2.3.0 ile tam uyumlu 3.11.9 sürümüne çivile:
-requirements = python3==3.11.9,hostpython3==3.11.9,kivy==2.3.0,pyjnius
+[app]
 
-# Sadece modern 64-bit Android mimarisini hedefle (süreyi yarıya indirir):
-android.archs = arm64-v8a
+# (zorunlu) Uygulama bilgileri
+title = Lugat
+package.name = lugat
+package.domain = org.kelime
+source.dir = .
+source.include_exts = py
+source.exclude_dirs = tests, bin, .github, .buildozer
+version = 1.0.0
 
-# API seviyeleri:
+# Kivy 2.3.0 + pyjnius: Android'de sözlük adresini tarayıcıda açmak için (Intent)
+requirements = python3,kivy==2.3.0,pyjnius
+
+orientation = portrait
+fullscreen = 0
+
+# Android izinleri: uygulama internete kendisi bağlanmaz, adresi tarayıcıya devreder
+android.permissions =
+
 android.api = 34
 android.minapi = 24
 android.ndk = 25b
+android.archs = arm64-v8a, armeabi-v7a
+android.accept_sdk_license = True
+android.allow_backup = True
 
-# Logların kesilmemesi için hata ayıklama seviyesini 1 yap (hata olursa 2 yaparsın):
-log_level = 1
+# Derleme günlüğü
+log_level = 2
+warn_on_root = 1
+
+[buildozer]
+log_level = 2
+warn_on_root = 1
